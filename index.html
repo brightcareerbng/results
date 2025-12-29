@@ -1,74 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Bright Career Public School ( class 1st to class 8th ) – Result</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Exam Result Portal</title>
 
-  <style>
-    body{
-      margin:0;
-      font-family: Arial, sans-serif;
-      background:#f2f4f7;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-    }
-    .card{
-      background:#fff;
-      padding:35px;
-      border-radius:8px;
-      text-align:center;
-      box-shadow:0 10px 25px rgba(0,0,0,0.1);
-      width:90%;
-      max-width:420px;
-    }
-    h1{
-      color:#c0392b;
-      margin-bottom:8px;
-      font-size:22px;
-    }
-    p{
-      color:#555;
-      font-size:14px;
-    }
-    a{
-      display:inline-block;
-      margin-top:20px;
-      padding:12px 28px;
-      background:#1a73e8;
-      color:#fff;
-      text-decoration:none;
-      border-radius:5px;
-      font-size:16px;
-    }
-    a:hover{
-      background:#0f5bd6;
-    }
-    .note{
-      margin-top:15px;
-      font-size:12px;
-      color:#777;
-    }
-  </style>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+}
+.container{
+  max-width:900px;
+  margin:20px auto;
+  background:#fff;
+  border:3px solid red;
+  padding:15px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  border-bottom:2px solid #ccc;
+  padding-bottom:10px;
+}
+.logo img{width:90px;}
+.school-text{flex:1;text-align:center;}
+.school-text h1{color:red;margin:4px 0;}
+.school-text .info{font-weight:bold;margin:3px 0;}
+.school-text h3{margin:3px 0;font-weight:normal;}
+
+/* FORM */
+.form{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:15px;
+}
+.form input,.form select{
+  padding:8px;
+  font-size:15px;
+}
+.hint{
+  width:100%;
+  text-align:center;
+  font-size:12px;
+  color:#555;
+}
+.form button{
+  padding:8px 18px;
+  font-size:15px;
+  border:none;
+  color:#fff;
+  cursor:pointer;
+}
+.search{background:#0d6efd;}
+.print{background:#198754;}
+
+#error{color:red;margin-top:10px;text-align:center;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;margin-top:15px;}
+table,th,td{border:1px solid #000;}
+th{background:#3fa2dd;color:#fff;padding:8px;}
+td{padding:6px;text-align:center;}
+.total-row td{background:#3fa2dd;color:#fff;font-weight:bold;}
+
+/* FOOTER */
+.footer{
+  display:flex;
+  justify-content:space-between;
+  margin-top:40px;
+}
+.footer div{
+  width:40%;
+  text-align:center;
+  border-top:1px solid #000;
+  padding-top:5px;
+}
+
+/* PRINT */
+@media print{
+  .form,#error{display:none;}
+  .container{border:none;}
+}
+
+/* MOBILE */
+@media(max-width:600px){
+  .header{flex-direction:column;}
+  .logo img{margin:auto;}
+}
+</style>
 </head>
+
 <body>
 
-<div class="card">
-  <h1>Bright Career Public School</h1>
-  <p>Half Yearly Examination Result ( class 1st to class 8th ) – 2025</p>
+<div class="container">
 
-  <!-- RESULT BUTTON -->
-  <a href="https://script.google.com/macros/s/AKfycbzwkEvayDta3XEM_Ph-BQXLiZq0MuKRGkuBPxiROmy1Q7Dnnm70rwkFsi76edhx6vcYnA/exec"
-     target="_blank">
-    Check Result
-  </a>
-
-  <div class="note">
-    Use Roll No, Class & Date of Birth as per school record
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <img src="https://ik.imagekit.io/a2wpi1kd9/imgToUrl/image-to-url_9FkUjGvCmc">
+    </div>
+    <div class="school-text">
+      <h1>BRIGHT CAREER PUBLIC SCHOOL</h1>
+      <div class="info">
+        SHRAWASTI (U.P.) | KOTWALI BHINGA (U-DISE CODE: 09510215001)
+      </div>
+      <h3>HALF YEARLY EXAMINATION – 2025 RESULT</h3>
+    </div>
   </div>
+
+  <!-- SEARCH FORM -->
+  <div class="form">
+    <input id="roll" placeholder="Roll No (BCPS801)">
+
+    <select id="cls">
+      <option value="">Select Class</option>
+      <option>Class 1</option><option>Class 2</option><option>Class 3</option>
+      <option>Class 4</option><option>Class 5</option>
+      <option>Class 6</option><option>Class 7</option><option>Class 8</option>
+    </select>
+
+    <input type="date" id="dob">
+
+    <button class="search" onclick="getResult()">Search</button>
+    <button class="print" onclick="window.print()">Print</button>
+
+    <div class="hint">
+      Date of Birth example: <b>DD-MM-YYYY</b> (06-06-2012)
+    </div>
+  </div>
+
+  <div id="error"></div>
+  <div id="result"></div>
+
 </div>
+
+<script>
+const SHEET_URL =
+"https://opensheet.elk.sh/1ILjMxyHNYmRHzSMkhr7frPfvE67No_Y_i6By-7FeOKQ/Results";
+
+/* Date → YYYY-MM-DD */
+function formatDateForSheet(dateValue){
+  const d = new Date(dateValue);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/* ✅ Class normalize: 8 / 8th / Class 8 → Class 8 */
+function normalizeClass(cls){
+  if(!cls) return "";
+  const num = cls.toString().match(/\d+/);
+  return num ? "Class " + num[0] : cls;
+}
+
+async function getResult(){
+  const roll = document.getElementById("roll").value.trim();
+  const clsInput = document.getElementById("cls").value;
+  const dobInput = document.getElementById("dob").value;
+
+  const error = document.getElementById("error");
+  const result = document.getElementById("result");
+
+  error.innerHTML="";
+  result.innerHTML="";
+
+  if(!roll || !clsInput || !dobInput){
+    error.innerHTML="Please enter Roll No, Class and Date of Birth";
+    return;
+  }
+
+  const dob = formatDateForSheet(dobInput);
+
+  const res = await fetch(SHEET_URL);
+  const data = await res.json();
+
+  const r = data.find(x =>
+    x["Roll no."] === roll &&
+    formatDateForSheet(x["Dob"]) === dob
+  );
+
+  if(!r){
+    error.innerHTML="Result not found";
+    return;
+  }
+
+  const displayClass = normalizeClass(r["Class"]);
+
+  result.innerHTML = `
+    <p>
+      <b>Name:</b> ${r.Name} &nbsp;&nbsp;
+      <b>Father's Name:</b> ${r.Father}
+    </p>
+    <p>
+      <b>Roll No:</b> ${r["Roll no."]} &nbsp;&nbsp;
+      <b>Class:</b> ${displayClass} &nbsp;&nbsp;
+      <b>DOB:</b> ${r.Dob}
+    </p>
+
+    <table>
+      <tr><th>Sr</th><th>Subject</th><th>Full Marks</th><th>Marks Obtained</th></tr>
+      <tr><td>1</td><td>Hindi</td><td>50</td><td>${r.Hindi}</td></tr>
+      <tr><td>2</td><td>English</td><td>50</td><td>${r.English}</td></tr>
+      <tr><td>3</td><td>Maths</td><td>50</td><td>${r.Maths}</td></tr>
+      <tr><td>4</td><td>Science</td><td>50</td><td>${r.Science}</td></tr>
+      <tr><td>5</td><td>SST</td><td>50</td><td>${r.SST}</td></tr>
+      <tr><td>6</td><td>GK</td><td>50</td><td>${r.GK}</td></tr>
+      <tr><td>7</td><td>Art</td><td>50</td><td>${r.Art}</td></tr>
+      <tr><td>8</td><td>Moral</td><td>50</td><td>${r.Moral}</td></tr>
+      <tr><td>9</td><td>PT</td><td>50</td><td>${r.PT}</td></tr>
+
+      <tr class="total-row"><td colspan="2">Total</td><td>450</td><td>${r.Total}</td></tr>
+      <tr class="total-row"><td colspan="3">Percentage</td><td>${r.Percentage}</td></tr>
+      <tr class="total-row"><td colspan="3">Result</td><td>${r.Result}</td></tr>
+    </table>
+
+    <div class="footer">
+      <div>Class Teacher</div>
+      <div>Principal</div>
+    </div>
+  `;
+}
+</script>
 
 </body>
 </html>
