@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
+  <meta charset="UTF-8">
+  <title>Exam Result Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      background: #f9f9f9;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
       margin: 0;
       padding: 20px;
       text-align: center;
@@ -14,38 +17,41 @@
     .card {
       background: #fff;
       border: 3px solid red;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 20px;
       max-width: 950px;
       margin: auto;
     }
 
     h1 { color: red; margin: 0; text-transform: uppercase; }
-    h2 { margin: 3px 0; }
-    h3 { margin: 5px 0; font-weight: normal; }
+    h2 { margin: 4px 0; }
+    h3 { margin: 6px 0; font-weight: normal; }
 
     input, select {
-      padding: 8px;
-      width: 220px;
+      padding: 10px;
+      width: 230px;
       border: 1px solid #ccc;
       border-radius: 6px;
       margin: 6px;
+      font-size: 14px;
     }
 
     button {
-      padding: 8px 18px;
-      margin: 8px 5px;
+      padding: 10px 20px;
+      margin: 10px 5px;
       border: none;
       border-radius: 6px;
       background: #2980b9;
       color: #fff;
       cursor: pointer;
+      font-size: 15px;
     }
+
     button:hover { background: #1c5985; }
 
     table {
       border-collapse: collapse;
-      margin: 15px auto;
+      margin: 20px auto;
       width: 95%;
       font-size: 14px;
     }
@@ -65,27 +71,27 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
     }
 
     .header-logo img {
       width: 90px;
-      margin-right: 12px;
+      margin-right: 15px;
     }
 
     .footer {
-      margin-top: 30px;
+      margin-top: 35px;
       display: flex;
       justify-content: space-between;
-      padding: 0 50px;
+      padding: 0 40px;
     }
 
     .footer div {
       width: 40%;
-      border-bottom: 1px dotted #000;
-      padding-bottom: 5px;
+      border-top: 1px dotted #000;
+      padding-top: 6px;
       font-weight: bold;
-      text-align: center;
     }
 
     @media print {
@@ -97,22 +103,24 @@
 </head>
 
 <body>
+
 <div class="card">
 
-  <!-- HEADER WITH UDISE -->
+  <!-- HEADER -->
   <div class="header-logo">
-    <img src="https://ik.imagekit.io/a2wpi1kd9/imgToUrl/image-to-url_9FkUjGvCmc" alt="Logo">
+    <img src="https://ik.imagekit.io/a2wpi1kd9/imgToUrl/image-to-url_9FkUjGvCmc" alt="School Logo">
     <div>
-      <h1>BRIGHT CAREER PUBLIC SCHOOL</h1>
-      <h2>SHRAWASTI (U.P.)</h2>
-      <h3><b>KOTWALI BHINGA (U-DISE CODE) 09510215001</b></h3>
-      <h3>HALF YEARLY EXAMINATION – 2025 RESULT</h3>
+      <h1>Bright Career Public School</h1>
+      <h2>Shrawasti (U.P.)</h2>
+      <h3><b>Kotwali Bhinga (U-DISE Code : 09510215001)</b></h3>
+      <h3>Half Yearly Examination – 2025 Result</h3>
     </div>
   </div>
 
   <!-- SEARCH FORM -->
-  <input type="text" id="rollNo" placeholder="Enter Roll No (BCPS1)">
-  
+  <input type="text" id="rollNo" placeholder="Enter Roll No (BCPS1 or 1)">
+  <br>
+
   <select id="class">
     <option value="">Select Class</option>
     <option>Class 1</option>
@@ -128,16 +136,18 @@
   </select>
 
   <input type="date" id="dob">
-
   <br>
-  <button onclick="searchResult()">Search</button>
+
+  <button onclick="searchResult()">Search Result</button>
   <button onclick="window.print()">Print</button>
 
   <div id="result"></div>
-
 </div>
 
 <script>
+const SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbym8MCaZ9yig802Z8TlYVsl66qAT4wMPcqMofyoIsHiNahw8q2o06JLLZmGDexRL5rOug/exec";
+
 function searchResult() {
 
   let roll = document.getElementById("rollNo").value.trim();
@@ -145,23 +155,32 @@ function searchResult() {
   let dob  = document.getElementById("dob").value;
 
   if (!roll || !cls || !dob) {
-    alert("Please enter Roll No, Class and DOB");
+    alert("Please enter Roll No, Class and Date of Birth");
     return;
   }
 
-  // BCPS1 ya sirf 1 – dono allow
+  // BCPS1 ya 1 – dono allow
   roll = roll.replace(/[^0-9]/g, "");
 
-  google.script.run
-    .withSuccessHandler(showResult)
-    .getResult(roll, cls, dob);
+  const url = `${SCRIPT_URL}?roll=${roll}&class=${encodeURIComponent(cls)}&dob=${dob}`;
+
+  document.getElementById("result").innerHTML =
+    "<h3>Loading result...</h3>";
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => showResult(data))
+    .catch(() => {
+      document.getElementById("result").innerHTML =
+        "<h3 style='color:red'>Server Error</h3>";
+    });
 }
 
 function showResult(data) {
 
   if (data.error) {
     document.getElementById("result").innerHTML =
-      "<h3 style='color:red'>" + data.error + "</h3>";
+      `<h3 style="color:red">${data.error}</h3>`;
     return;
   }
 
@@ -178,14 +197,17 @@ function showResult(data) {
 
     <table>
       <tr>
-        <th>Sr</th><th>Subject</th><th>Full Marks</th><th>Marks Obtained</th>
+        <th>Sr</th>
+        <th>Subject</th>
+        <th>Full Marks</th>
+        <th>Marks Obtained</th>
       </tr>
       <tr><td>1</td><td>Hindi</td><td>50</td><td>${data.hindi}</td></tr>
       <tr><td>2</td><td>English</td><td>50</td><td>${data.english}</td></tr>
       <tr><td>3</td><td>Maths</td><td>50</td><td>${data.maths}</td></tr>
       <tr><td>4</td><td>Science</td><td>50</td><td>${data.science}</td></tr>
-      <tr><td>5</td><td>Sst</td><td>50</td><td>${data.sst}</td></tr>
-      <tr><td>6</td><td>Gk</td><td>50</td><td>${data.gk}</td></tr>
+      <tr><td>5</td><td>SST</td><td>50</td><td>${data.sst}</td></tr>
+      <tr><td>6</td><td>GK</td><td>50</td><td>${data.gk}</td></tr>
       <tr><td>7</td><td>Art</td><td>50</td><td>${data.art}</td></tr>
       <tr><td>8</td><td>Moral</td><td>50</td><td>${data.moral}</td></tr>
       <tr><td>9</td><td>PT</td><td>50</td><td>${data.pt}</td></tr>
